@@ -1,0 +1,394 @@
+openapi: 3.0.3
+
+info:
+  title: LinkForge API
+  version: 1.0.0
+  description: |
+    Мінімальний API скорочувача URL, що використовується в лабораторних 1–5.
+
+    Кожна відповідь містить заголовок `X-Request-Id`. Тіла помилок мають єдину
+    форму: `{ error, code?, details?, requestId }`. `POST /links` є ідемпотентним,
+    коли передано заголовок `Idempotency-Key`: повтор із тим самим ключем повертає
+    той самий ресурс, а не створює дубль.
+
+servers:
+  - url: http://localhost:3000
+    description: Локальний сервер розробки
+
+tags:
+  - name: Links
+    description: Основний ресурс скорочувача URL
+  - name: Items
+    description: Демо-ресурс для лаб. 1 (клієнт → бекенд → база даних)
+  - name: Health
+    description: Проба живучості
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Проба живучості
+      operationId: getHealth
+      responses:
+        '200':
+          description: Сервіс працює
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /items:
+    get:
+      tags: [Items]
+      summary: Перелік демо-елементів із бази даних
+      operationId: listItems
+      responses:
+        '200':
+          description: Масив елементів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /links:
+    get:
+      tags: [Links]
+      summary: Перелік усіх коротких посилань
+      operationId: listLinks
+      responses:
+        '200':
+          description: Колекція посилань
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkListResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+    post:
+      tags: [Links]
+      summary: Створити коротке посилання
+      description: |
+        Створює нове коротке посилання. Коли передано `Idempotency-Key`, повтор
+        запиту з тим самим ключем повертає раніше створене посилання (той самий
+        `id`) замість створення дубля.
+      operationId: createLink
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Згенерований клієнтом ключ, що робить POST безпечним для повторів.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLinkRequest'
+      responses:
+        '201':
+          description: Посилання створено (або повторено для відомого Idempotency-Key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /links/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Links]
+      summary: Отримати одне посилання за id
+      operationId: getLink
+      responses:
+        '200':
+          description: Запитане посилання
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    put:
+      tags: [Links]
+      summary: Замінити змінювані поля посилання
+      operationId: replaceLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLinkRequest'
+      responses:
+        '200':
+          description: Оновлене посилання
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    patch:
+      tags: [Links]
+      summary: Частково оновити посилання
+      operationId: patchLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLinkRequest'
+      responses:
+        '200':
+          description: Оновлене посилання
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      tags: [Links]
+      summary: Видалити посилання
+      operationId: deleteLink
+      responses:
+        '204':
+          description: Посилання видалено (без вмісту)
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /{slug}:
+    parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Links]
+      summary: Розв'язати короткий slug і перенаправити
+      operationId: redirectSlug
+      responses:
+        '302':
+          description: Редірект на оригінальний URL
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  responses:
+    BadRequest:
+      description: Помилка валідації
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: ValidationError
+            code: ORIGINAL_URL_REQUIRED
+            details:
+              - field: originalUrl
+                message: originalUrl is required
+            requestId: 8f14e45f-ea3d-4f0b-9c3a-6c1a2b3d4e5f
+    NotFound:
+      description: Ресурс не знайдено
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: NotFound
+            code: LINK_NOT_FOUND
+            details: null
+            requestId: 8f14e45f-ea3d-4f0b-9c3a-6c1a2b3d4e5f
+    Conflict:
+      description: Slug уже зайнятий
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: Conflict
+            code: SLUG_TAKEN
+            details: null
+            requestId: 8f14e45f-ea3d-4f0b-9c3a-6c1a2b3d4e5f
+    RateLimited:
+      description: Забагато запитів
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Скільки секунд клієнт має зачекати перед повторним запитом.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: too_many_requests
+            code: RATE_LIMITED
+            details: null
+            requestId: 8f14e45f-ea3d-4f0b-9c3a-6c1a2b3d4e5f
+    ServiceUnavailable:
+      description: Тимчасовий збій вище за потоком (безпечно повторити)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: service_unavailable
+            code: UPSTREAM_UNAVAILABLE
+            details: null
+            requestId: 8f14e45f-ea3d-4f0b-9c3a-6c1a2b3d4e5f
+
+  schemas:
+    Item:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Welcome to the URL shortener
+
+    CreateLinkRequest:
+      type: object
+      required: [originalUrl]
+      properties:
+        originalUrl:
+          type: string
+          format: uri
+          example: https://example.com/a/very/long/path
+        slug:
+          type: string
+          pattern: '^[A-Za-z0-9_-]{3,32}$'
+          example: my-link
+        title:
+          type: string
+          nullable: true
+          example: My link
+
+    UpdateLinkRequest:
+      type: object
+      description: Слід передати принаймні одне зі змінюваних полів.
+      properties:
+        originalUrl:
+          type: string
+          format: uri
+          example: https://example.com/updated
+        title:
+          type: string
+          nullable: true
+          example: Updated title
+
+    LinkResponse:
+      type: object
+      required: [id, slug, originalUrl, shortUrl, clicks, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 3a6234ac-95fc-4671-97b9-647360789ac8
+        slug:
+          type: string
+          example: my-link
+        originalUrl:
+          type: string
+          format: uri
+          example: https://example.com/a/very/long/path
+        shortUrl:
+          type: string
+          format: uri
+          example: http://localhost:3000/my-link
+        title:
+          type: string
+          nullable: true
+          example: My link
+        clicks:
+          type: integer
+          minimum: 0
+          example: 0
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-11-24T10:15:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-11-24T10:15:00.000Z'
+
+    LinkListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkResponse'
+
+    ErrorResponse:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: string
+          example: ValidationError
+        code:
+          type: string
+          nullable: true
+          example: ORIGINAL_URL_REQUIRED
+        details:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        requestId:
+          type: string
+          example: 8f14e45f-ea3d-4f0b-9c3a-6c1a2b3d4e5f

@@ -1,0 +1,36 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="linkforge-contexts" name="Контекстна карта">
+    <mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="links" value="Контекст Links (ядро)&#10;Link · Slug · ClickCounter&#10;створення, розв'язання slug, редірект" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#5b8cff;fontColor=#7aa2ff;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="120" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="items" value="Items (підтримувальний)&#10;Item (id, name)&#10;без залежності від Links" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#2a3152;fontColor=#e8ebf7;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="identity" value="Identity (майбутнє)&#10;User, Account&#10;постачає ownerId у Links" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#0f1220;strokeColor=#9aa3c0;fontColor=#9aa3c0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="430" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="analytics" value="Analytics (майбутнє)&#10;ClickEvent, Report&#10;споживає події LinkClicked" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#0f1220;strokeColor=#9aa3c0;fontColor=#9aa3c0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="120" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="notify" value="Notifications (майбутнє)&#10;Subscriber, Message&#10;надсилає сповіщення про термін дії" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#0f1220;strokeColor=#9aa3c0;fontColor=#9aa3c0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="430" width="260" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" value="upstream → downstream (ownerId через ACL)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;html=1;strokeColor=#7aa2ff;fontColor=#7aa2ff;" edge="1" parent="1" source="identity" target="links">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="LinkClicked" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#3ddc97;fontColor=#3ddc97;" edge="1" parent="1" source="links" target="analytics">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="події терміну дії" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;html=1;strokeColor=#9aa3c0;fontColor=#9aa3c0;" edge="1" parent="1" source="links" target="notify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

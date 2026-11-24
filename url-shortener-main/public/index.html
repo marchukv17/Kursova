@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkForge — скорочувач URL</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="degraded-banner" class="banner hidden" role="alert">
+    <strong>Сервіс перевантажено.</strong>
+    Запити постійно завершуються збоєм — дії тимчасово вимкнено. Зачекайте мить.
+  </div>
+
+  <main class="wrap">
+    <header class="hero">
+      <h1>LinkForge</h1>
+      <p class="subtitle">Мінімальний скорочувач URL — лабораторні 1–5 (клієнт → бекенд → база даних)</p>
+      <p class="meta">
+        <span id="health-pill" class="pill">стан: …</span>
+        <span id="request-pill" class="pill">X-Request-Id: —</span>
+      </p>
+    </header>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Лаб. 1 · Елементи з бази даних</h2>
+        <button id="load-items" class="btn secondary">Завантажити елементи</button>
+      </div>
+      <ul id="items-list" class="list"><li class="muted">Натисніть «Завантажити елементи».</li></ul>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Створити коротке посилання</h2>
+        <label class="chaos">
+          <input type="checkbox" id="chaos-toggle" />
+          Режим chaos (тестові збої)
+        </label>
+      </div>
+      <form id="create-form" class="form">
+        <label>
+          Оригінальний URL
+          <input type="url" id="original-url" placeholder="https://example.com/a/very/long/path" required />
+        </label>
+        <div class="row">
+          <label>
+            Власний slug (необов'язково)
+            <input type="text" id="slug" placeholder="my-link" pattern="[A-Za-z0-9_-]{3,32}" />
+          </label>
+          <label>
+            Заголовок (необов'язково)
+            <input type="text" id="title" placeholder="Моє посилання" />
+          </label>
+        </div>
+        <div class="actions">
+          <button type="submit" id="create-btn" class="btn primary">Скоротити</button>
+          <button type="button" id="refresh-btn" class="btn secondary">Оновити список</button>
+        </div>
+      </form>
+      <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Посилання</h2>
+        <span id="links-count" class="muted">0 посилань</span>
+      </div>
+      <ul id="links-list" class="list"><li class="muted">Посилань ще немає.</li></ul>
+    </section>
+
+    <footer class="foot">
+      <span>Контракт API: <a href="/docs/api/openapi.yaml">docs/api/openapi.yaml</a></span>
+      <span>Стан: <a href="/health">/health</a></span>
+    </footer>
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

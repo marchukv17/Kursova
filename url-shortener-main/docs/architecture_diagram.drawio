@@ -1,0 +1,60 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="linkforge-arch" name="Архітектура">
+    <mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="client" value="Клієнт (браузер)&#10;public/index.html&#10;public/app.js&#10;Завантажити · Створити · Деградація" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#5b8cff;fontColor=#e8ebf7;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="backend" value="Бекенд (Node.js + Express)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#171b2e;strokeColor=#2a3152;fontColor=#e8ebf7;" vertex="1" parent="1">
+          <mxGeometry x="360" y="60" width="320" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="api/ (контролери, мапінг DTO)&#10;маршрути: /links, /items, /health&#10;коди статусів + X-Request-Id" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#2a3152;fontColor=#e8ebf7;" vertex="1" parent="1">
+          <mxGeometry x="390" y="110" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="service" value="service/ (сценарії)&#10;валідація, генерація slug&#10;мапінг DTO ↔ домен" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#2a3152;fontColor=#e8ebf7;" vertex="1" parent="1">
+          <mxGeometry x="390" y="230" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="domain" value="domain/ (сутності + інваріанти)&#10;Link, Item&#10;тут живуть правила валідації" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#2a3152;fontColor=#e8ebf7;" vertex="1" parent="1">
+          <mxGeometry x="390" y="350" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db" value="База даних SQLite&#10;node:sqlite (WAL)&#10;таблиці: items, links&#10;підготовлені запити" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2540;strokeColor=#3ddc97;fontColor=#3ddc97;" vertex="1" parent="1">
+          <mxGeometry x="780" y="240" width="250" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="auth" value="Auth Service (майбутнє)&#10;токени, власність" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#0f1220;strokeColor=#9aa3c0;fontColor=#9aa3c0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="80" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="analytics" value="Analytics (майбутнє)&#10;події кліків, статистика" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#0f1220;strokeColor=#9aa3c0;fontColor=#9aa3c0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="400" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="notify" value="Notifications (майбутнє)&#10;email / webhooks" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#0f1220;strokeColor=#9aa3c0;fontColor=#9aa3c0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="520" width="250" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" value="HTTP / JSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5b8cff;fontColor=#7aa2ff;" edge="1" parent="1" source="client" target="api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="у процесі" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5b8cff;fontColor=#9aa3c0;" edge="1" parent="1" source="api" target="service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="у процесі" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5b8cff;fontColor=#9aa3c0;" edge="1" parent="1" source="service" target="domain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="SQL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#3ddc97;fontColor=#3ddc97;" edge="1" parent="1" source="service" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;html=1;strokeColor=#9aa3c0;" edge="1" parent="1" source="backend" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;html=1;strokeColor=#9aa3c0;" edge="1" parent="1" source="backend" target="analytics">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
